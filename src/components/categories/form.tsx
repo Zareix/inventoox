@@ -130,10 +130,13 @@ export function CategoryForm({ onFinish, parentCategoryId }: Props) {
                     field.handleChange(value ?? null)
                   }}
                   value={field.state.value}
-                  items={categories.map((category) => ({
-                    value: String(category.id),
-                    label: category.name,
-                  }))}
+                  items={[
+                    { value: '', label: 'No parent category' },
+                    ...categories.map((category) => ({
+                      value: String(category.id),
+                      label: category.name,
+                    })),
+                  ]}
                   disabled={
                     categoriesQuery.isLoading || categoriesQuery.isError
                   }

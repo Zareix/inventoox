@@ -47,7 +47,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body>
-        <main>{children}</main>
+        <main className="min-h-screen py-8 px-2">{children}</main>
         <Toaster />
         <TanStackDevtools
           config={{

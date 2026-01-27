@@ -15,6 +15,13 @@
       "when": 1769454620322,
       "tag": "0001_windy_black_widow",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1769530420452,
+      "tag": "0002_amusing_bloodstrike",
+      "breakpoints": true
     }
   ]
 }
