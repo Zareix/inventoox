@@ -1,15 +1,23 @@
-import { relations } from 'drizzle-orm'
-import { index, int, sqliteTable, text } from 'drizzle-orm/sqlite-core'
+import { relations, sql } from 'drizzle-orm'
+import { index, sqliteTable } from 'drizzle-orm/sqlite-core'
 import { user } from './auth'
 
 export const categories = sqliteTable(
   'category',
-  {
-    id: int('id', { mode: 'number' }).primaryKey({ autoIncrement: true }),
-    name: text('name', { length: 256 }).notNull(),
-    icon: text('icon', { length: 256 }).notNull(),
-    parentCategoryId: int('parent_category_id', { mode: 'number' }),
-  },
+  (d) => ({
+    id: d.integer('id', { mode: 'number' }).primaryKey({ autoIncrement: true }),
+    name: d.text('name', { length: 256 }).notNull(),
+    icon: d.text('icon', { length: 256 }).notNull(),
+    parentCategoryId: d.integer('parent_category_id', { mode: 'number' }),
+    createdAt: d
+      .integer({ mode: 'timestamp' })
+      .default(sql`(unixepoch())`)
+      .notNull(),
+    updated_at: d
+      .integer('updated_at', { mode: 'timestamp' })
+      .notNull()
+      .$onUpdateFn(() => new Date()),
+  }),
   (table) => [index('category_name_idx').on(table.name)],
 )
 
@@ -28,11 +36,19 @@ export type Category = typeof categories.$inferSelect
 
 export const rooms = sqliteTable(
   'room',
-  {
-    id: int('id', { mode: 'number' }).primaryKey({ autoIncrement: true }),
-    name: text('name', { length: 256 }).notNull(),
-    icon: text('icon', { length: 256 }).notNull(),
-  },
+  (d) => ({
+    id: d.integer('id', { mode: 'number' }).primaryKey({ autoIncrement: true }),
+    name: d.text('name', { length: 256 }).notNull(),
+    icon: d.text('icon', { length: 256 }).notNull(),
+    createdAt: d
+      .integer({ mode: 'timestamp' })
+      .default(sql`(unixepoch())`)
+      .notNull(),
+    updated_at: d
+      .integer('updated_at', { mode: 'timestamp' })
+      .notNull()
+      .$onUpdateFn(() => new Date()),
+  }),
   (table) => [index('room_name_idx').on(table.name)],
 )
 
@@ -44,14 +60,23 @@ export type Room = typeof rooms.$inferSelect
 
 export const locations = sqliteTable(
   'location',
-  {
-    id: int('id', { mode: 'number' }).primaryKey({ autoIncrement: true }),
-    roomId: int('room_id', { mode: 'number' })
+  (d) => ({
+    id: d.integer('id', { mode: 'number' }).primaryKey({ autoIncrement: true }),
+    roomId: d
+      .integer('room_id', { mode: 'number' })
       .notNull()
       .references(() => rooms.id),
-    name: text('name', { length: 256 }).notNull(),
-    icon: text('icon', { length: 256 }).notNull(),
-  },
+    name: d.text('name', { length: 256 }).notNull(),
+    icon: d.text('icon', { length: 256 }).notNull(),
+    createdAt: d
+      .integer({ mode: 'timestamp' })
+      .default(sql`(unixepoch())`)
+      .notNull(),
+    updated_at: d
+      .integer('updated_at', { mode: 'timestamp' })
+      .notNull()
+      .$onUpdateFn(() => new Date()),
+  }),
   (table) => [index('location_name_idx').on(table.name)],
 )
 
@@ -66,25 +91,37 @@ export type Location = typeof locations.$inferSelect
 
 export const items = sqliteTable(
   'item',
-  {
-    id: int('id', { mode: 'number' }).primaryKey({ autoIncrement: true }),
-    name: text('name', { length: 256 }).notNull(),
-    categoryId: int('category_id', { mode: 'number' })
+  (d) => ({
+    id: d.integer('id', { mode: 'number' }).primaryKey({ autoIncrement: true }),
+    name: d.text('name', { length: 256 }).notNull(),
+    categoryId: d
+      .integer('category_id', { mode: 'number' })
       .notNull()
       .references(() => categories.id),
-    locationId: int('location_id', { mode: 'number' })
+    locationId: d
+      .integer('location_id', { mode: 'number' })
       .notNull()
       .references(() => locations.id),
-    value: int('value', { mode: 'number' }).notNull(),
-    size: text('size', { length: 128 }).notNull(),
-    owner_id: text('owner_id').references(() => user.id),
-    quantity: int('quantity', { mode: 'number' }).notNull(),
-    brand: text('brand', { length: 256 }).notNull(),
-    state: text('state', {
-      length: 128,
-      enum: ['stored', 'in use'],
-    }).notNull(),
-  },
+    value: d.integer('value', { mode: 'number' }).notNull(),
+    size: d.text('size', { length: 128 }).notNull(),
+    owner_id: d.text('owner_id').references(() => user.id),
+    quantity: d.integer('quantity', { mode: 'number' }).notNull(),
+    brand: d.text('brand', { length: 256 }).notNull(),
+    state: d
+      .text('state', {
+        length: 128,
+        enum: ['stored', 'in use'],
+      })
+      .notNull(),
+    createdAt: d
+      .integer({ mode: 'timestamp' })
+      .default(sql`(unixepoch())`)
+      .notNull(),
+    updated_at: d
+      .integer('updated_at', { mode: 'timestamp' })
+      .notNull()
+      .$onUpdateFn(() => new Date()),
+  }),
   (table) => [index('item_name_idx').on(table.name)],
 )
 

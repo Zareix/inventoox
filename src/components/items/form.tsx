@@ -22,16 +22,29 @@ import {
   SelectValue,
 } from '~/components/ui/select'
 import { getAllRoomsWithLocations } from '~/server/functions/rooms'
-import { createItem } from '~/server/functions/items'
+import { createItem, editItem } from '~/server/functions/items'
 import { getAllCategoriesWithSubcategories } from '~/server/functions/categories'
 import { getAllUsers } from '~/server/functions/users'
 import { InputGroup } from '~/components/ui/input-group'
 
 type Props = {
   onFinish?: () => void
+  item?: Pick<
+    Item,
+    | 'id'
+    | 'name'
+    | 'categoryId'
+    | 'locationId'
+    | 'value'
+    | 'size'
+    | 'quantity'
+    | 'brand'
+    | 'state'
+    | 'owner_id'
+  >
 }
 
-export function ItemForm({ onFinish }: Props) {
+export function ItemForm({ onFinish, item }: Props) {
   const roomsQuery = useQuery({
     queryKey: ['rooms-with-locations'],
     queryFn: () => getAllRoomsWithLocations(),
@@ -64,18 +77,38 @@ export function ItemForm({ onFinish }: Props) {
       })
     },
   })
+  const editItemMutation = useMutation({
+    mutationKey: ['items', 'edit'],
+    mutationFn: (
+      data: Parameters<typeof editItem>[0]['data'] & { id: number },
+    ) =>
+      editItem({
+        data,
+      }),
+    onSuccess: (data) => {
+      form.reset()
+      onFinish?.()
+      queryClient.invalidateQueries({ queryKey: ['items'] })
+      toast.success(`Item "${data.name}" edited successfully`)
+    },
+    onError: (error) => {
+      toast.error(`Error editing item`, {
+        description: error instanceof Error ? error.message : String(error),
+      })
+    },
+  })
 
   const form = useForm({
     defaultValues: {
-      name: '',
-      categoryId: '',
-      locationId: '',
-      value: 0,
-      size: '',
-      quantity: 1,
-      brand: '',
-      state: 'stored' as Item['state'],
-      owner_id: null as string | null,
+      name: item?.name ?? '',
+      categoryId: item?.categoryId.toString() ?? '',
+      locationId: item?.locationId.toString() ?? '',
+      value: item?.value ?? 0,
+      size: item?.size ?? '',
+      quantity: item?.quantity ?? 1,
+      brand: item?.brand ?? '',
+      state: item?.state ?? 'stored',
+      owner_id: item?.owner_id ?? null,
     },
     onSubmit: ({ value }) => {
       const submittedValue = {
@@ -83,6 +116,10 @@ export function ItemForm({ onFinish }: Props) {
         categoryId: Number(value.categoryId),
         locationId: Number(value.locationId),
         owner_id: value.owner_id ? String(value.owner_id) : null,
+      }
+      if (item) {
+        editItemMutation.mutate({ id: item.id, ...submittedValue })
+        return
       }
       createItemMutation.mutate(submittedValue)
     },
