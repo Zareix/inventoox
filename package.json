@@ -60,7 +60,7 @@
     "@types/node": "^25.0.10",
     "@types/react": "^19.2.9",
     "@types/react-dom": "^19.2.3",
-    "@vitejs/plugin-react": "^5.1.2",
+    "@vitejs/plugin-react": "^6.0.0",
     "drizzle-kit": "^0.31.8",
     "jsdom": "^27.4.0",
     "prettier": "^3.8.1",
